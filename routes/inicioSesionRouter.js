@@ -2,8 +2,8 @@ const express = require("express");
 const app = express.Router();
 const InicioSesionService = require("../services/InicioSesionService"); 
 
-app.get("/", (req, res) => {
-    const { nombre, contrasena } = req.query;
+app.post("/", (req, res) => {
+    const { nombre, contrasena } = req.body;
 
     InicioSesionService.InicioSesion(nombre, contrasena)
         .then(user => {

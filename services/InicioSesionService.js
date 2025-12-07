@@ -4,7 +4,7 @@ class InicioSesionService {
 
     async InicioSesion(nombre, contrasena) {
         const sql = `
-            SELECT nombre, contrasena
+            SELECT *
             FROM usuarios
             WHERE nombre = ? AND contrasena = ?
             LIMIT 1
