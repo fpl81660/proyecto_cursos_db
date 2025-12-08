@@ -1,20 +1,14 @@
 const db = require("../db");
 
-class InicioSesionService {
+class CursosService {
 
-    async Cursos(nombre, contrasena) {
-        const sql = `
-            SELECT *
-            FROM usuarios
-            WHERE nombre = ? AND contrasena = ?
-            LIMIT 1
-        `;
-
+    async CrearCursos(idcreador,titulo,descripcion,foto,precio,usuarios_inscritos) {
+        const sql = `insert into cursos (idcreador,titulo,descripcion,foto,precio,usuarios_inscritos) values (?,?,?,?,?,?)`;
         return new Promise((resolve, reject) => {
-            db.query(sql, [nombre, contrasena], (err, result) => {
+            db.query(sql, [idcreador,titulo,descripcion,foto,precio,usuarios_inscritos], (err, result) => {
                 if (err) {
                     return reject({
-                        error: "Error al procesar el inicio de sesión",
+                        error: "Error al registar el curso",
                         details: err
                     });
                 }
@@ -22,7 +16,7 @@ class InicioSesionService {
                 if (result.length === 0) {
                     return reject({
                         status: 401,
-                        error: "Credenciales incorrectas"
+                        error: "Datos incorrectos"
                     });
                 }
 
@@ -30,6 +24,24 @@ class InicioSesionService {
             });
         });
     }
+ async ObtenerCursos() {
+        const sql = `select * from cursos`;
+        return new Promise((resolve, reject) => {
+            db.query(sql, (err, result) => {
+                if (err) {
+                    return reject({
+                        error: "Error al buscar el curso",
+                        details: err
+                    });
+                 }
+
+     res.status(200).json(result);
+            });
+        });
+    }
+
+
 }
 
-module.exports = new InicioSesionService();
+
+module.exports = new CursosService();
