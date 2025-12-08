@@ -46,12 +46,13 @@ router.get("/", (req, res) => {
         });
 });
 router.get("/:id", (req, res) => {
-    CursosService.ObtenerCursoPorId(req.params.id)
+    const { id } = req.params;
+    CursosService.ObtenerCursoPorId(id)
         .then(curso => {
             res.json(curso);
         })
         .catch(error => {
-            res.status(500).json({ error: "Error al obtener cursos" });
+            res.status(error.status || 500).json(error);
         });
 });
 module.exports = router;

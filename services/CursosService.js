@@ -44,15 +44,20 @@ class CursosService {
             db.query(sql, [id], (err, result) => {
                 if (err) {
                     return reject({
-                        error: "Error al buscar los cursos",
+                        error: "Error al buscar el curso",
                         details: err
                     });
                 }
-                resolve(result); 
+                if (result.length === 0) {
+                    return reject({
+                        status: 404,
+                        error: "Curso no encontrado"
+                    });
+                }
+                resolve(result[0]);
             });
         });
     }
-
 
 }
 
