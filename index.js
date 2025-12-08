@@ -10,24 +10,16 @@ const { route } = require("./routes/inicioSesionRouter");
 
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
 routerApi(app)
 
-app.get("/",(req, res) => {
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
+
+app.get("/", (req, res) => {
   res.send("Servidor funcionando");
 });
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'public/uploads'); 
-    },
-    filename: (req, file, cb) => {
-        
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
-const upload = multer({ storage: storage });
 /*
 app.post("/iniciosesion", (req, res) => {
   const{nombre,contrasena}=req.body;
