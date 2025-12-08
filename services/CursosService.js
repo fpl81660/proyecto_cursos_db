@@ -25,17 +25,30 @@ class CursosService {
         });
     }
  async ObtenerCursos() {
-        const sql = `select * from cursos`;
+        const sql = `SELECT * FROM cursos`;
         return new Promise((resolve, reject) => {
             db.query(sql, (err, result) => {
                 if (err) {
                     return reject({
-                        error: "Error al buscar el curso",
+                        error: "Error al buscar los cursos",
                         details: err
                     });
-                 }
-
-     res.status(200).json(result);
+                }
+                resolve(result); 
+            });
+        });
+    }
+    async ObtenerCursoPorId(id) {
+        const sql = `SELECT * FROM cursos WHERE id = ?`;
+        return new Promise((resolve, reject) => {
+            db.query(sql, [id], (err, result) => {
+                if (err) {
+                    return reject({
+                        error: "Error al buscar los cursos",
+                        details: err
+                    });
+                }
+                resolve(result); 
             });
         });
     }
