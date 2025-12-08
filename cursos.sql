@@ -19,5 +19,16 @@ CREATE TABLE cursos (
     usuarios_inscritos INT DEFAULT 0,
     FOREIGN KEY (idcreador) REFERENCES usuarios(idUsuario)
 );
-
-select * from usuarios
+CREATE TABLE pagos (
+    idPago INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    idUsuario INT NOT NULL,
+    idCurso INT NOT NULL,
+    monto DECIMAL(10, 2) NOT NULL,
+    fecha_pago DATETIME DEFAULT CURRENT_TIMESTAMP,
+    estado VARCHAR(20),
+    FOREIGN KEY (idUsuario) REFERENCES usuarios(idUsuario) ,
+    FOREIGN KEY (idCurso) REFERENCES cursos(id) 
+);
+select * from usuarios;
+select * from cursos;
+select * from pagos;
