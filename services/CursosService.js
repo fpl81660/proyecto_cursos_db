@@ -59,6 +59,33 @@ class CursosService {
         });
     }
 
+    // ... métodos anteriores (CrearCursos, ObtenerCursos) ...
+
+    // Método para obtener los cursos que el usuario YA compró
+    async ObtenerCursosComprados(usuarioId) {
+        const sql = `
+            SELECT c.* FROM cursos c
+            JOIN compras co ON c.id = co.curso_id
+            WHERE co.usuario_id = ?
+        `;
+        return new Promise((resolve, reject) => {
+            db.query(sql, [usuarioId], (err, result) => {
+                if (err) return reject(err);
+                resolve(result);
+            });
+        });
+    }
+
+    // Método para obtener los cursos que el usuario CREÓ (Mis Publicaciones)
+    async ObtenerCursosCreados(usuarioId) {
+        const sql = `SELECT * FROM cursos WHERE idcreador = ?`;
+        return new Promise((resolve, reject) => {
+            db.query(sql, [usuarioId], (err, result) => {
+                if (err) return reject(err);
+                resolve(result);
+            });
+        });
+    }
 }
 
 
