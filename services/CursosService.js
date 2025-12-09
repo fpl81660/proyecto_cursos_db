@@ -1,92 +1,58 @@
-const db = require("../db");
+const express = require("express");
+const router = express.Router();
+const CursosService = require("../services/CursosService");
+const multer = require('multer');
+const path = require("path");
+const fs = require('fs');
 
-class CursosService {
-
-    async CrearCursos(idcreador,titulo,descripcion,foto,precio,usuarios_inscritos) {
-        const sql = `insert into cursos (idcreador,titulo,descripcion,foto,precio,usuarios_inscritos) values (?,?,?,?,?,?)`;
-        return new Promise((resolve, reject) => {
-            db.query(sql, [idcreador,titulo,descripcion,foto,precio,usuarios_inscritos], (err, result) => {
-                if (err) {
-                    return reject({
-                        error: "Error al registar el curso",
-                        details: err
-                    });
-                }
-
-                if (result.length === 0) {
-                    return reject({
-                        status: 401,
-                        error: "Datos incorrectos"
-                    });
-                }
-
-                resolve(result[0]);
-            });
-        });
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadPath = 'public/uploads';
+        if (!fs.existsSync(uploadPath)){
+            fs.mkdirSync(uploadPath, { recursive: true });
+        }
+        cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
     }
- async ObtenerCursos() {
-        const sql = `SELECT * FROM cursos`;
-        return new Promise((resolve, reject) => {
-            db.query(sql, (err, result) => {
-                if (err) {
-                    return reject({
-                        error: "Error al buscar los cursos",
-                        details: err
-                    });
-                }
-                resolve(result); 
-            });
+});
+
+const upload = multer({ storage: storage });
+
+router.post("/", upload.single('foto'), (req, res) => {
+    
+    const { idcreador, titulo, descripcion, precio, usuarios_inscritos } = req.body;
+    
+    const foto = req.file ? `http://localhost:3000/uploads/${req.file.filename}` : null;
+
+    CursosService.CrearCursos(idcreador, titulo, descripcion, foto, precio, usuarios_inscritos)
+        .then(result => {
+            res.status(201).json(result);
+        })
+        .catch(error => {
+            res.status(500).json(error);
         });
-    }
-    async ObtenerCursoPorId(id) {
-        const sql = `SELECT * FROM cursos WHERE id = ?`;
-        return new Promise((resolve, reject) => {
-            db.query(sql, [id], (err, result) => {
-                if (err) {
-                    return reject({
-                        error: "Error al buscar el curso",
-                        details: err
-                    });
-                }
-                if (result.length === 0) {
-                    return reject({
-                        status: 404,
-                        error: "Curso no encontrado"
-                    });
-                }
-                resolve(result[0]);
-            });
+});
+
+router.get("/", (req, res) => {
+    CursosService.ObtenerCursos()
+        .then(cursos => {
+            res.json(cursos);
+        })
+        .catch(error => {
+            res.status(500).json({ error: "Error al obtener cursos" });
         });
-    }
-
-    // ... métodos anteriores (CrearCursos, ObtenerCursos) ...
-
-    // Método para obtener los cursos que el usuario YA compró
-    async ObtenerCursosComprados(usuarioId) {
-        const sql = `
-            SELECT c.* FROM cursos c
-            JOIN compras co ON c.id = co.curso_id
-            WHERE co.usuario_id = ?
-        `;
-        return new Promise((resolve, reject) => {
-            db.query(sql, [usuarioId], (err, result) => {
-                if (err) return reject(err);
-                resolve(result);
-            });
+});
+router.get("/:id", (req, res) => {
+    const { id } = req.params;
+    CursosService.ObtenerCursoPorId(id)
+        .then(curso => {
+            res.json(curso);
+        })
+        .catch(error => {
+            res.status(error.status || 500).json(error);
         });
-    }
-
-    // Método para obtener los cursos que el usuario CREÓ (Mis Publicaciones)
-    async ObtenerCursosCreados(usuarioId) {
-        const sql = `SELECT * FROM cursos WHERE idcreador = ?`;
-        return new Promise((resolve, reject) => {
-            db.query(sql, [usuarioId], (err, result) => {
-                if (err) return reject(err);
-                resolve(result);
-            });
-        });
-    }
-}
-
-
-module.exports = new CursosService();
+});
+module.exports = router;
